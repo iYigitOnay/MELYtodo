@@ -1,0 +1,26 @@
+#root {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.App h1 {
+  font-size: 3.5em;
+  font-weight: 800; 
+  line-height: 1.1;
+  margin: 0;
+ 
+  background-image: linear-gradient(2deg, #377dff, #f30055);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

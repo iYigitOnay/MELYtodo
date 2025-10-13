@@ -1,67 +1,66 @@
 import { Request, Response } from "express";
-import { Todo } from "../models/todo_model";
-
-let todos: Todo[] = [];
-let nextId: number = 1;
+import Todo from "../models/todo_model";
 
 /**
  * @desc
  * @route GET /todos
  */
 
-export const getAllTodos = (req: Request, res: Response) => {
-  res.status(200).json(todos);
+export const getAllTodos = async (req: Request, res: Response) => {
+  try {
+    const todos = await Todo.find({});
+    res.status(200).json(todos);
+  } catch (err) {
+    console.log(res.status(500).json({ message: "Error fetching todos" }));
+  }
 };
 
-export const addTodo = (req: Request, res: Response) => {
-  const { title } = req.body;
+export const addTodo = async (req: Request, res: Response) => {
+  try {
+    const { text } = req.body;
 
-  if (!title) {
-    return res.status(400).json({ message: "Title is required" });
+    if (!text) {
+      return res.status(400).json({ message: "Text field is required" });
+    }
+
+    const newTodo = await Todo.create({ text });
+    res.status(201).json(newTodo);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
   }
-
-  const newTodo: Todo = {
-    id: nextId++,
-    title: title,
-    completed: false,
-  };
-
-  todos.push(newTodo);
-
-  res.status(201).json(newTodo);
 };
 
-export const deleteTodo = (req: Request, res: Response) => {
-  const { id } = req.params;
+export const deleteTodo = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const deleteTodo = await Todo.findByIdAndDelete(id);
 
-  const todoIndex = todos.findIndex((todo) => todo.id === parseInt(id));
-
-  if (todoIndex === -1) {
-    return res.status(404).json({ message: "Todo not found" });
+    if (!deleteTodo) {
+      return res.status(404).json({ message: "Toda not found" });
+    }
+    res.status(200).json({ message: "Todo deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting todo" });
   }
-
-  todos.splice(todoIndex, 1);
-
-  res.status(200).json({ message: "Todo deleted successfully" });
 };
 
-export const updateTodo = (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { title, completed } = req.body;
+export const updateTodo = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { text, completed } = req.body;
 
-  const todo = todos.find((todo) => todo.id === parseInt(id));
+    const updatedTodo = await Todo.findByIdAndUpdate(
+      id,
+      { completed },
+      { new: true }
+    );
 
-  if (!todo) {
-    return res.status(404).json({ message: "Todo not found" });
+    if (!updatedTodo) {
+      return res.status(404).json({ message: "Todo not found" });
+    }
+
+    res.status(200).json(updatedTodo);
+  } catch (err) {
+    res.status(500).json({ message: "Error updating todo" });
   }
-
-  if (title !== undefined) {
-    todo.title = title;
-  }
-
-  if (completed !== undefined) {
-    todo.completed = completed;
-  }
-
-  res.status(200).json(todo);
 };

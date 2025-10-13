@@ -1,0 +1,42 @@
+.form {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.input {
+  flex-grow: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db; /* Daha açık gri sınır */
+  font-size: 1em;
+  font-family: inherit;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #007BFF; /* Neon Mavi odak */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.75rem 1.5rem;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s;
+  background-color: #007BFF; /* Neon Mavi arka plan */
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 123, 255, 0.3);
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
