@@ -1,21 +1,36 @@
+import "dotenv/config";
 import express, { Request, Response } from "express";
-import todo_routes from "./routes/todo_routes";
-import bodyParser from "body-parser";
 import cors from "cors";
-import connectDB from "./config/db";
+import connectDB from "./config/db.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Rotaları içeri aktar
+import story_routes from "./routes/story_routes.js";
+import auth_routes from "./routes/auth_routes.js";
+
+const app = express();
+const port = process.env.PORT || 3000;
 
 connectDB();
 
-const app = express();
-const port = 3000;
-
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-app.use("/todos", todo_routes);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("API is running...");
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, '../../frontend/dist')));
+
+// Rotaları kullan
+app.use("/api/story", story_routes);
+app.use("/api/auth", auth_routes);
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 });
 
 app.listen(port, () => {

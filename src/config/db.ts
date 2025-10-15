@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/MELYtodo");
+    await mongoose.connect(process.env.MONGO_URI as string);
     console.log("Database connected successfully");
   } catch (err) {
     console.error("Database connection error:", err);

@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+}
+
+.storyOutput {
+  flex-grow: 1;
+  background-color: #fdf6e3; /* Kullanıcının isteği üzerine krem rengine geri dönüldü */
+  border: 1px solid #eee8d5;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+  overflow-y: auto;
+  line-height: 1.7;
+  color: #586e75;
+  white-space: pre-wrap;
+}
