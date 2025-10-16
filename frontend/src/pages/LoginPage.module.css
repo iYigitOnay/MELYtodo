@@ -34,15 +34,31 @@
 }
 
 .imageContainer {
-  background-image: url('../assets/melygranmom.png');
+  background-image: url("../assets/melygranmom.png");
   background-size: cover;
   background-position: center;
 }
 
-.form h1 { margin-bottom: 1rem; font-weight: 700; color: #657b83; font-size: 2em; }
-.form p { margin-bottom: 2rem; color: #93a1a1; }
-.inputGroup { margin-bottom: 1.5rem; text-align: left; }
-.inputGroup label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #657b83; }
+.form h1 {
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: #657b83;
+  font-size: 2em;
+}
+.form p {
+  margin-bottom: 2rem;
+  color: #93a1a1;
+}
+.inputGroup {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+.inputGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #657b83;
+}
 .inputGroup input {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -52,7 +68,11 @@
   transition: border-color 0.25s, box-shadow 0.25s;
   background-color: #fdf6e3;
 }
-.inputGroup input:focus { outline: none; border-color: #cb4b16; box-shadow: 0 0 0 3px rgba(203, 75, 22, 0.2); }
+.inputGroup input:focus {
+  outline: none;
+  border-color: #cb4b16;
+  box-shadow: 0 0 0 3px rgba(203, 75, 22, 0.2);
+}
 
 .button {
   width: 100%;
@@ -67,31 +87,37 @@
   color: #ffffff;
 }
 .button:hover {
-    background-color: #d95b00;
+  background-color: #d95b00;
 }
 
 /* Yeni Şifremi Unuttum linki için stil */
 .forgotLink {
-    font-size: 0.9em;
-    color: #6c757d;
-    text-align: right;
-    display: block;
-    margin-top: -0.75rem; /* Input ile arasındaki boşluğu azalt */
-    margin-bottom: 1.5rem;
-    text-decoration: none;
+  font-size: 0.9em;
+  color: #6c757d;
+  text-align: right;
+  display: block;
+  margin-top: -0.75rem; /* Input ile arasındaki boşluğu azalt */
+  margin-bottom: 1.5rem;
+  text-decoration: none;
 }
 
 .forgotLink:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .redirectLink {
-    margin-top: 1.5rem;
-    font-size: 0.9em;
-    color: #93a1a1;
+  margin-top: 1.5rem;
+  font-size: 0.9em;
+  color: #93a1a1;
 }
-.redirectLink a { color: #859900; font-weight: 600; text-decoration: none; }
-.redirectLink a:hover { text-decoration: underline; }
+.redirectLink a {
+  color: #859900;
+  font-weight: 600;
+  text-decoration: none;
+}
+.redirectLink a:hover {
+  text-decoration: underline;
+}
 
 /* Öneri 2: Şık Hata Mesajı Stili */
 .errorMessage {
