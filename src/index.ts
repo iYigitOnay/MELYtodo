@@ -6,9 +6,11 @@ import connectDB from "./config/db.js";
 // Rotaları içeri aktar
 import story_routes from "./routes/story_routes.js";
 import auth_routes from "./routes/auth_routes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 
 const app = express();
-const port = process.env.PORT || 3000;
+
 
 connectDB();
 
@@ -19,6 +21,12 @@ app.use(express.json());
 app.use("/api/story", story_routes);
 app.use("/api/auth", auth_routes);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
+
+export default app;

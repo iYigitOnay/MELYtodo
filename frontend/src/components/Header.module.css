@@ -2,61 +2,129 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem 2rem;
+  background-color: var(--white); /* Set a background color for sticky header */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky; /* Make header sticky */
+  top: 0; /* Stick to the top */
+  z-index: 1000; /* Ensure it's above other content */
 }
 
 .titleLink {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: inherit;
 }
 
 .logo {
-  height: 40px;
+  height: 48px; /* Slightly larger logo */
   margin-right: 1rem;
 }
 
 .title {
-  font-size: 1.5rem;
+  font-size: 1.75rem; /* Larger title */
+  font-weight: 700;
   margin: 0;
-  color: #cb4b16; /* Düz, sıcak turuncu */
+  color: var(--primary-color);
 }
 
 .nav {
   display: flex;
   align-items: center;
+  gap: 1.5rem;
 }
 
 .userInfo {
-  margin-right: 1.5rem;
-  font-size: 0.9rem;
-  color: #93a1a1; /* Revert to original grey */
+  font-size: 1rem;
+  color: var(--text-color);
   font-weight: 500;
 }
 
 .userName {
-  color: #cb4b16; /* Apply theme color only to the name */
+  color: var(--primary-color);
   font-weight: 600;
 }
 
 .logoutButton {
-  background: none;
-  border: none;
+  background-color: var(--white);
+  border: 1px solid var(--secondary-color);
+  border-radius: 50%;
   cursor: pointer;
-  padding: 0;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
-  color: #555;
+  justify-content: center;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
 }
 
 .logoutButton:hover {
-  color: #000;
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
 }
 
 .logoutButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+.darkModeToggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+.darkModeToggle:hover {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+}
+
+.darkModeToggle svg {
   width: 22px;
   height: 22px;
+}
+
+.pullSwitchIcon {
+  transition: transform 0.1s ease-out; /* Smooth transition for the pull effect */
+}
+
+.darkModeToggle:active .pullSwitchIcon {
+  transform: translateY(5px); /* Move down when button is active (clicked) */
+}
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column; /* Stack items vertically */
+    padding: 1rem; /* Adjust padding */
+    gap: 0.5rem; /* Add some space between stacked items */
+  }
+
+  .titleLink {
+    margin-bottom: 0.5rem; /* Space below title when stacked */
+  }
+
+  .title {
+    font-size: 1.5rem; /* Smaller title on small screens */
+  }
+
+  .nav {
+    width: 100%; /* Full width for nav items */
+    justify-content: center; /* Center nav items */
+    gap: 1rem; /* Adjust gap */
+  }
+
+  .userInfo {
+    margin-right: 0; /* Remove right margin */
+  }
 }

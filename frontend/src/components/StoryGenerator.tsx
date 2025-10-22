@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import styles from "./StoryGenerator.module.css";
+import Skeleton from "./Skeleton"; // Import Skeleton component
 
 interface StoryGeneratorProps {
   story: string;
@@ -23,7 +24,7 @@ const StoryGenerator = ({
 
   return (
     <div className={styles.container}>
-      <h2>Hikaye Oluşturucu</h2>
+      <h2>Mely Anneanne Anlatıyor...</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
         <textarea
           value={topic}
@@ -33,18 +34,27 @@ const StoryGenerator = ({
           disabled={isLoading}
         />
         <button type="submit" className={styles.button} disabled={isLoading}>
-          {isLoading ? 'Oluşturuluyor...' : <>Hikaye Oluştur ✨</>}
+          {isLoading ? "Oluşturuluyor..." : <>Hikaye Oluştur ✨</>}
         </button>
       </form>
       <div className={styles.storyOutput}>
-        {isLoading && (
+        {isLoading ? (
           <div className={styles.loadingContainer}>
-            <div className={styles.dot}></div>
-            <div className={styles.dot}></div>
-            <div className={styles.dot}></div>
+            <Skeleton
+              height="20px"
+              width="80%"
+              style={{ marginBottom: "10px" }}
+            />
+            <Skeleton
+              height="20px"
+              width="90%"
+              style={{ marginBottom: "10px" }}
+            />
+            <Skeleton height="20px" width="70%" />
           </div>
+        ) : (
+          story && <p>{story}</p>
         )}
-        {story && !isLoading && <p>{story}</p>}
       </div>
     </div>
   );

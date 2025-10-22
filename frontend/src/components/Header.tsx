@@ -3,7 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import styles from './Header.module.css';
 import logo from '../assets/melygranmom.png'; // Logoyu import et
 
-const Header = () => {
+interface HeaderProps {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+}
+
+const Header = ({ darkMode, toggleDarkMode }: HeaderProps) => {
   const { user, logout } = useAuth();
 
   return (
@@ -13,6 +18,13 @@ const Header = () => {
         <h1 className={styles.title}>Mely Grandmom's Stories</h1>
       </Link>
       <nav className={styles.nav}>
+        <button onClick={toggleDarkMode} className={styles.darkModeToggle}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={darkMode ? "#fff" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.pullSwitchIcon}>
+            <circle cx="12" cy="18" r="3"></circle>
+            <line x1="12" y1="15" x2="12" y2="4"></line>
+            <path d="M9 4h6"></path>
+          </svg>
+        </button>
         {user ? (
           <>
             <span className={styles.userInfo}>Hoş geldin, <span className={styles.userName}>{user.name}</span></span>

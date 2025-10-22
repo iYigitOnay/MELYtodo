@@ -1,0 +1,42 @@
+# Frontend için Dockerfile (Multi-stage build)
+
+# --- Build Aşaması ---
+# Node.js tabanlı bir image kullan (derleme için)
+FROM node:20-alpine as builder
+
+# Çalışma dizinini ayarla
+WORKDIR /app
+
+# package.json ve package-lock.json dosyalarını kopyala
+COPY package*.json ./
+
+# Bağımlılıkları yükle
+RUN npm install
+
+# Frontend kaynak kodunu kopyala
+COPY . .
+
+# Frontend uygulamasını derle (Vite)
+# Bu komut `dist` klasörüne statik dosyaları oluşturacaktır.
+RUN npm run build
+
+# --- Serve Aşaması ---
+# Nginx tabanlı hafif bir image kullan (statik dosyaları sunmak için)
+FROM nginx:alpine
+
+# Nginx varsayılan yapılandırmasını kaldır
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Kendi Nginx yapılandırma dosyamızı ekle
+# Bu dosya, frontend uygulamanızın statik dosyalarını nasıl sunacağını belirler.
+# Henüz bu dosyayı oluşturmadık, bir sonraki adımda oluşturacağız.
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Build aşamasında oluşturulan statik dosyaları Nginx'in sunacağı dizine kopyala
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Nginx'in dinleyeceği portu belirt
+EXPOSE 80
+
+# Nginx'i başlat
+CMD ["nginx", "-g", "daemon off;"]

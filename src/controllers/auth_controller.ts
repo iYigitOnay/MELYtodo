@@ -9,7 +9,12 @@ const RESET_TOKEN_EXPIRES_IN = 10 * 60 * 1000; // 10 minutes
 
 // --- Helper Functions ---
 const generateToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET as string, {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    console.error("JWT_SECRET is not defined in the environment variables.");
+    throw new Error("Sunucu yapılandırma hatası: JWT secret eksik.");
+  }
+  return jwt.sign({ id }, secret, {
     expiresIn: JWT_EXPIRATION,
   });
 };
@@ -52,21 +57,29 @@ export const registerUser = async (req: Request, res: Response) => {
  */
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+  console.log('Login attempt for email:', email);
   try {
+    console.log('Before User.findOne');
     const user: IUser | null = await User.findOne({ email });
+    console.log('After User.findOne, user:', user ? user.email : 'not found');
+
     if (user && (await user.matchPassword(password))) {
+      console.log('Password matched. Before generateToken');
+      const token = generateToken(user._id.toString());
+      console.log('Token generated. Before sending success response');
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id.toString()),
+        token: token,
       });
     } else {
+      console.log('Invalid credentials. Before sending 401 response');
       res.status(401).json({ message: "Geçersiz email veya şifre" });
     }
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Sunucu Hatası" });
+    console.error('Login error:', error); // Log the full error object
+    res.status(500).json({ message: "Sunucu Hatası", error: (error as Error).message || String(error) });
   }
 };
 

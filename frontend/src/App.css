@@ -1,18 +1,18 @@
 .container {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  flex-grow: 1; /* Allow container to fill space */
-  overflow: hidden; /* Prevent this container from scrolling */
-  min-height: 0; /* Fix for flexbox overflow issue */
+  gap: 2rem;
+  padding: 2rem;
+  flex-grow: 1;
+  overflow: hidden;
 }
 
-.left-panel, .right-panel {
+.left-panel,
+.right-panel {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  overflow-y: auto; /* Allow panels to scroll */
+  gap: 2rem;
+  overflow-y: auto;
   scrollbar-width: none; /* Firefox */
 }
 
@@ -21,23 +21,46 @@
   display: none; /* Chrome, Safari */
 }
 
-
-/* Panellerin genel görünümü */
 .left-panel > div,
 .right-panel > div {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
-  width: 100%; /* Panelin tüm alanını kapla */
+  background-color: var(--white);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px var(--shadow-color);
+  border: 1px solid var(--panel-border-color);
+  transition: all 0.3s ease;
 }
 
-/* Sağdaki panellerin dikeyde esneyip alanı doldurmasını sağla */
+.left-panel > div:hover,
+.right-panel > div:hover {
+  box-shadow: 0 12px 32px var(--shadow-color);
+  position: relative; /* Create a new stacking context */
+  z-index: 1; /* Ensure it stacks above siblings but below header */
+}
+
 .right-panel > div:first-child {
-    flex: 1;
+  flex: 1;
 }
 
 .right-panel > div:last-child {
-    flex: 1;
+  flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    grid-template-columns: 1fr; /* Single column layout on small screens */
+    padding: 1rem; /* Reduce padding */
+    gap: 1rem; /* Reduce gap */
+  }
+
+  .left-panel > div,
+  .right-panel > div {
+    padding: 1.5rem; /* Adjust panel padding */
+  }
+
+  .left-panel,
+  .right-panel {
+    gap: 1rem; /* Adjust gap between items in panels */
+  }
 }

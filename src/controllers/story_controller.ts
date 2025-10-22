@@ -23,11 +23,9 @@ export const generateStory = async (req: AuthRequest, res: Response) => {
 
   if (!openRouterApiKey) {
     console.error("OpenRouter API key not found in .env file");
-    return res
-      .status(500)
-      .json({
-        message: "Sunucu yapılandırma hatası: AI servisine bağlanılamadı.",
-      });
+    return res.status(500).json({
+      message: "Sunucu yapılandırma hatası: AI servisine bağlanılamadı.",
+    });
   }
 
   try {
@@ -41,8 +39,13 @@ export const generateStory = async (req: AuthRequest, res: Response) => {
         model: "mistralai/mistral-7b-instruct:free",
         messages: [
           {
+            role: "system",
+            content:
+              "You are a helpful assistant that generates stories. Your output MUST be in Turkish.",
+          },
+          {
             role: "user",
-            content: `Bir çocuk için, konusu '${topic}' olan, hayal gücünü geliştiren, sürükleyici ve anlamlı bir hikaye yaz. Hikaye, başlangıcı, gelişmesi ve bir sonucu olan net bir olay örgüsüne sahip olmalı. Karakterler ilgi çekici ve olaylar çocuklar için anlaşılır olmalı. Hikayenin sonunda küçük bir ders veya pozitif bir mesaj içermesi harika olur. Lütfen hikayeyi en fazla 300 kelime olacak şekilde oluştur.`,
+            content: `İngilizce öğrenmeye çalışan bir çocuk ya da genç birey için, konusu '${topic}' olan, hayal gücünü geliştiren, sürükleyici ve anlamlı, **KESİNLİKLE TÜRKÇE** bir hikaye yaz. Hikaye, başlangıcı, gelişmesi ve bir sonucu olan net bir olay örgüsüne sahip olmalı. Karakterler ilgi çekici ve olaylar çocuklar için anlaşılır olmalı. Hikayenin sonunda küçük bir ders veya pozitif bir mesaj içermesi harika olur. Lütfen hikayeyi en fazla 300 kelime olacak şekilde oluştur.`,
           },
         ],
       }),
@@ -55,7 +58,9 @@ export const generateStory = async (req: AuthRequest, res: Response) => {
     }
 
     const result = await response.json();
-    const storyText = (result.choices[0]?.message?.content || "").replace(/<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]/gi, "").trim();
+    const storyText = (result.choices[0]?.message?.content || "")
+      .replace(/\[?\[BOS\]\]?|\[?\[EOS\]\]?|<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]|\n\n/gi, "")
+      .trim();
 
     if (!storyText) {
       throw new Error("AI response did not contain a valid story.");
@@ -83,25 +88,23 @@ export const translateStory = async (req: Request, res: Response) => {
   const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 
   if (!storyId || !story || !language) {
-    return res.status(400).json({ message: "Hikaye, hikaye ID'si ve hedef dil zorunludur." });
+    return res
+      .status(400)
+      .json({ message: "Hikaye, hikaye ID'si ve hedef dil zorunludur." });
   }
 
   if (!["english", "french"].includes(language.toLowerCase())) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "Çeviri şimdilik sadece İngilizce ve Fransızca için desteklenmektedir.",
-      });
+    return res.status(400).json({
+      message:
+        "Çeviri şimdilik sadece İngilizce ve Fransızca için desteklenmektedir.",
+    });
   }
 
   if (!openRouterApiKey) {
     console.error("OpenRouter API key not found in .env file");
-    return res
-      .status(500)
-      .json({
-        message: "Sunucu yapılandırma hatası: AI servisine bağlanılamadı.",
-      });
+    return res.status(500).json({
+      message: "Sunucu yapılandırma hatası: AI servisine bağlanılamadı.",
+    });
   }
 
   try {
@@ -116,7 +119,7 @@ export const translateStory = async (req: Request, res: Response) => {
         messages: [
           {
             role: "user",
-            content: `Translate the following Turkish story to ${language} at an A1/A2 level for a child. Keep the meaning and tone of the original story. Story: ${story}`,
+            content: `Translate the following Turkish story to ${language}. The translation should be simplified for a child, targeting an A1/A2 language level. Ensure the meaning and tone of the original story are preserved. Story: ${story}`,
           },
         ],
       }),
@@ -124,37 +127,73 @@ export const translateStory = async (req: Request, res: Response) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("OpenRouter API Error:", errorText);
+      console.error("OpenRouter API Error (translateStory):", errorText); // Added context to log
       throw new Error(`AI service failed with status: ${response.status}`);
     }
 
     const result = await response.json();
-    console.log("Raw AI Response (translateStory):", result.choices[0]?.message?.content);
-    const translatedStoryText = (result.choices[0]?.message?.content || "").replace(/<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]/gi, "").trim();
+    const rawAiContent = result.choices[0]?.message?.content;
+    console.log("Raw AI Response (translateStory):", rawAiContent); // Existing log
+    // Add a log for the full result to inspect its structure if needed
+    console.log("Full AI Result (translateStory):", JSON.stringify(result, null, 2));
 
-    if (!translatedStoryText) {
-      throw new Error("AI response did not contain a valid translation.");
+    if (!rawAiContent) {
+      throw new Error("AI did not return any content for translation.");
     }
 
-    const updatedStory = await Story.findByIdAndUpdate(
-      storyId,
-      {
-        translatedStory: translatedStoryText.trim(),
-        language: language,
-      },
-      { new: true }
-    );
+    let translatedStoryText = (rawAiContent || "")
+      .replace(/\[?\[BOS\]\]?|\[?\[EOS\]\]?|<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]|\n\n/gi, "")
+      .trim();
 
-    if (!updatedStory) {
-      return res.status(404).json({ message: "Hikaye bulunamadı." });
-    }
+        if (!translatedStoryText) {
 
-    res.status(200).json({ translatedStory: updatedStory.translatedStory });
-  } catch (error) {
-    console.error("Hikaye çevrilirken hata:", error);
-    res.status(500).json({ message: "Hikaye çevrilemedi." });
-  }
-};
+          // If AI fails to provide a translation, set a default message
+
+          translatedStoryText = "Çeviri yapılamadı.";
+
+        }
+
+    
+
+        const updatedStory = await Story.findByIdAndUpdate(
+
+          storyId,
+
+          {
+
+            translatedStory: translatedStoryText.trim(),
+
+            language: language,
+
+          },
+
+          { new: true }
+
+        );
+
+    
+
+        if (!updatedStory) {
+
+          return res.status(404).json({ message: "Hikaye bulunamadı." });
+
+        }
+
+    
+
+        res.status(200).json({ translatedStory: updatedStory.translatedStory });
+
+            } catch (error) {
+
+              console.error("Hikaye çevrilirken hata:", error); // Existing log
+
+              console.error("Detailed translation error:", error); // Added for more detail
+
+              res.status(500).json({ message: "Hikaye çevrilemedi." });
+
+            }
+
+    };
 
 /**
  * @desc    Get all stories for a user
@@ -162,7 +201,9 @@ export const translateStory = async (req: Request, res: Response) => {
  */
 export const getStories = async (req: AuthRequest, res: Response) => {
   try {
-    const stories = await Story.find({ user: req.user?._id }).sort({ createdAt: -1 });
+    const stories = await Story.find({ user: req.user?._id }).sort({
+      createdAt: -1,
+    });
     res.json(stories);
   } catch (error) {
     console.error(error);
@@ -183,6 +224,34 @@ export const getStoryById = async (req: Request, res: Response) => {
     } else {
       res.status(404).json({ message: "Hikaye bulunamadı" });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Sunucu Hatası" });
+  }
+};
+
+/**
+ * @desc    Delete a story by ID
+ * @route   DELETE /api/story/:id
+ */
+export const deleteStory = async (req: AuthRequest, res: Response) => {
+  try {
+    const story = await Story.findById(req.params.id);
+
+    if (!story) {
+      return res.status(404).json({ message: "Hikaye bulunamadı" });
+    }
+
+    // Check if the logged-in user is the owner of the story
+    if (story.user.toString() !== req.user?._id.toString()) {
+      return res
+        .status(401)
+        .json({ message: "Bu hikayeyi silmeye yetkiniz yok" });
+    }
+
+    await story.deleteOne();
+
+    res.json({ message: "Hikaye başarıyla silindi" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Sunucu Hatası" });

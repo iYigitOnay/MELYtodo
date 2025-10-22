@@ -6,14 +6,31 @@
 }
 
 .storyOutput {
-  flex-grow: 1;
-  background-color: #fdf6e3; /* Kullanıcının isteği üzerine krem rengine geri dönüldü */
-  border: 1px solid #eee8d5;
+  flex-grow: 2; /* Give more vertical space */
+  background-color: var(--background-color);
+  border: 1px solid var(--secondary-color);
   border-radius: 8px;
   padding: 1rem;
   text-align: left;
   overflow-y: auto;
   line-height: 1.7;
-  color: #586e75;
+  color: var(--text-color);
   white-space: pre-wrap;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; /* Align skeletons to the left */
+  height: 100%;
+  gap: 10px; /* Space between skeleton lines */
+}
+
+@media (max-width: 768px) {
+  .storyOutput {
+    padding: 0.8rem; /* Further reduce padding */
+    font-size: 0.9em; /* Further reduce font size */
+    line-height: 1.5; /* Adjust line height */
+  }
 }

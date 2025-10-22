@@ -10,8 +10,7 @@
     "build:backend": "tsc -p tsconfig.json",
     "build:frontend": "npm run build --prefix frontend",
     "build:all": "npm run build:backend && npm run build:frontend",
-    "build": "npm run build:backend",
-    "postinstall": "npm install --prefix frontend"
+    "build": "npm run build:backend"
   },
   "repository": {
     "type": "git",
@@ -44,6 +43,10 @@
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.6"
   }
 }

@@ -1,0 +1,29 @@
+# Backend için Dockerfile
+# Node.js tabanlı bir image kullan
+FROM node:20-alpine
+
+# Çalışma dizinini ayarla
+WORKDIR /app
+
+# package.json ve package-lock.json dosyalarını kopyala
+# Bağımlılıkları yüklemek için bu dosyalar yeterlidir, bu sayede cache daha verimli kullanılır
+COPY package*.json ./
+
+# Bağımlılıkları yükle
+RUN npm install
+
+# Tüm backend kaynak kodunu kopyala
+COPY src ./src
+COPY tsconfig.json ./
+COPY .env ./
+
+# TypeScript projesini derle
+# Eğer backend'iniz JavaScript ise bu adımı atlayabilirsiniz.
+RUN npm run build
+
+# Uygulamanın dinleyeceği portu belirt
+EXPOSE 3000
+
+# Uygulamayı başlatma komutu
+# npm run start komutunuzun package.json'da "node dist/index.js" veya benzeri bir komutu çalıştırdığından emin olun.
+CMD ["npm", "run", "start"]
