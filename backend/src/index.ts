@@ -1,9 +1,9 @@
-import "dotenv/config";
+import dotenv from 'dotenv';
+dotenv.config({ path: './backend/.env' });
 import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
 
-// Rotaları içeri aktar
 import story_routes from "./routes/story_routes.js";
 import auth_routes from "./routes/auth_routes.js";
 import swaggerUi from "swagger-ui-express";

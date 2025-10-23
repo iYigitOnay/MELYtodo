@@ -37,15 +37,17 @@ export const generateStory = async (req: AuthRequest, res: Response) => {
       },
       body: JSON.stringify({
         model: "mistralai/mistral-7b-instruct:free",
+        temperature: 0.7,
+        max_tokens: 300,
         messages: [
           {
             role: "system",
             content:
-              "You are a helpful assistant that generates stories. Your output MUST be in Turkish.",
+              "You are a helpful assistant that generates short stories in Turkish for children and young people learning English. Your stories should be simple (A1/A2 level), engaging, and meaningful. Pay close attention to grammar rules, sentence structure, and ensure the story has a clear plot with a beginning, middle, and end. The story should also convey a small lesson or a positive message.",
           },
           {
             role: "user",
-            content: `İngilizce öğrenmeye çalışan bir çocuk ya da genç birey için, konusu '${topic}' olan, hayal gücünü geliştiren, sürükleyici ve anlamlı, **KESİNLİKLE TÜRKÇE** bir hikaye yaz. Hikaye, başlangıcı, gelişmesi ve bir sonucu olan net bir olay örgüsüne sahip olmalı. Karakterler ilgi çekici ve olaylar çocuklar için anlaşılır olmalı. Hikayenin sonunda küçük bir ders veya pozitif bir mesaj içermesi harika olur. Lütfen hikayeyi en fazla 300 kelime olacak şekilde oluştur.`,
+            content: `Konusu '${topic}' olan, hayal gücünü geliştiren, sürükleyici ve anlamlı, **KESİNLİKLE TÜRKÇE** kısa bir hikaye yaz. Hikaye, başlangıcı, gelişmesi ve bir sonucu olan net bir olay örgüsüne sahip olmalı. Karakterler ilgi çekici ve olaylar çocuklar için anlaşılır olmalı. Hikayenin sonunda küçük bir ders veya pozitif bir mesaj içermesi harika olur.`,
           },
         ],
       }),
@@ -58,8 +60,15 @@ export const generateStory = async (req: AuthRequest, res: Response) => {
     }
 
     const result = await response.json();
+    console.log(
+      "OpenRouter API Result (generateStory):",
+      JSON.stringify(result, null, 2)
+    );
     const storyText = (result.choices[0]?.message?.content || "")
-      .replace(/\[?\[BOS\]\]?|\[?\[EOS\]\]?|<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]|\n\n/gi, "")
+      .replace(
+        /\[?\[BOS\]\]?|\[?\[EOS\]\]?|<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]|\n\n/gi,
+        ""
+      )
       .trim();
 
     if (!storyText) {
@@ -116,10 +125,17 @@ export const translateStory = async (req: Request, res: Response) => {
       },
       body: JSON.stringify({
         model: "mistralai/mistral-7b-instruct:free",
+        temperature: 0.7,
+        max_tokens: 300,
         messages: [
           {
+            role: "system",
+            content:
+              "You are a helpful assistant that translates Turkish stories into simple English (A1/A2 level) for children and young people learning English. Pay close attention to grammar rules, sentence structure, and ensure the translated story preserves the original meaning and tone.",
+          },
+          {
             role: "user",
-            content: `Translate the following Turkish story to ${language}. The translation should be simplified for a child, targeting an A1/A2 language level. Ensure the meaning and tone of the original story are preserved. Story: ${story}`,
+            content: `Translate the following Turkish story to ${language}. Simplify the language for an A1/A2 level learner. Story: ${story}`,
           },
         ],
       }),
@@ -132,68 +148,57 @@ export const translateStory = async (req: Request, res: Response) => {
     }
 
     const result = await response.json();
+    console.log("OpenRouter API Result (translateStory):", JSON.stringify(result, null, 2));
     const rawAiContent = result.choices[0]?.message?.content;
     console.log("Raw AI Response (translateStory):", rawAiContent); // Existing log
     // Add a log for the full result to inspect its structure if needed
-    console.log("Full AI Result (translateStory):", JSON.stringify(result, null, 2));
+    console.log(
+      "Full AI Result (translateStory):",
+      JSON.stringify(result, null, 2)
+    );
 
     if (!rawAiContent) {
       throw new Error("AI did not return any content for translation.");
     }
 
     let translatedStoryText = (rawAiContent || "")
-      .replace(/\[?\[BOS\]\]?|\[?\[EOS\]\]?|<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]|\n\n/gi, "")
+      .replace(
+        /\[?\[BOS\]\]?|\[?\[EOS\]\]?|<s>|<\/s>|\[\/?INST\]|\[\/?OUT\]|\n\n/gi,
+        ""
+      )
       .trim();
 
-        if (!translatedStoryText) {
+    if (!translatedStoryText) {
+      // If AI fails to provide a translation, set a default message
 
-          // If AI fails to provide a translation, set a default message
+      translatedStoryText = "Çeviri yapılamadı.";
+    }
 
-          translatedStoryText = "Çeviri yapılamadı.";
+    const updatedStory = await Story.findByIdAndUpdate(
+      storyId,
 
-        }
+      {
+        translatedStory: translatedStoryText.trim(),
 
-    
+        language: language,
+      },
 
-        const updatedStory = await Story.findByIdAndUpdate(
+      { new: true }
+    );
 
-          storyId,
+    if (!updatedStory) {
+      return res.status(404).json({ message: "Hikaye bulunamadı." });
+    }
 
-          {
+    res.status(200).json({ translatedStory: updatedStory.translatedStory });
+  } catch (error) {
+    console.error("Hikaye çevrilirken hata:", error);
 
-            translatedStory: translatedStoryText.trim(),
+    console.error("Detailed translation error:", error);
 
-            language: language,
-
-          },
-
-          { new: true }
-
-        );
-
-    
-
-        if (!updatedStory) {
-
-          return res.status(404).json({ message: "Hikaye bulunamadı." });
-
-        }
-
-    
-
-        res.status(200).json({ translatedStory: updatedStory.translatedStory });
-
-            } catch (error) {
-
-              console.error("Hikaye çevrilirken hata:", error); // Existing log
-
-              console.error("Detailed translation error:", error); // Added for more detail
-
-              res.status(500).json({ message: "Hikaye çevrilemedi." });
-
-            }
-
-    };
+    res.status(500).json({ message: "Hikaye çevrilemedi." });
+  }
+};
 
 /**
  * @desc    Get all stories for a user
@@ -242,7 +247,6 @@ export const deleteStory = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: "Hikaye bulunamadı" });
     }
 
-    // Check if the logged-in user is the owner of the story
     if (story.user.toString() !== req.user?._id.toString()) {
       return res
         .status(401)

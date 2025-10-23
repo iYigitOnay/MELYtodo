@@ -57,16 +57,16 @@ export const registerUser = async (req: Request, res: Response) => {
  */
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  console.log('Login attempt for email:', email);
+  console.log("Login attempt for email:", email);
   try {
-    console.log('Before User.findOne');
+    console.log("Before User.findOne");
     const user: IUser | null = await User.findOne({ email });
-    console.log('After User.findOne, user:', user ? user.email : 'not found');
+    console.log("After User.findOne, user:", user ? user.email : "not found");
 
     if (user && (await user.matchPassword(password))) {
-      console.log('Password matched. Before generateToken');
+      console.log("Password matched. Before generateToken");
       const token = generateToken(user._id.toString());
-      console.log('Token generated. Before sending success response');
+      console.log("Token generated. Before sending success response");
       res.json({
         _id: user._id,
         name: user.name,
@@ -74,12 +74,17 @@ export const loginUser = async (req: Request, res: Response) => {
         token: token,
       });
     } else {
-      console.log('Invalid credentials. Before sending 401 response');
+      console.log("Invalid credentials. Before sending 401 response");
       res.status(401).json({ message: "Geçersiz email veya şifre" });
     }
   } catch (error) {
-    console.error('Login error:', error); // Log the full error object
-    res.status(500).json({ message: "Sunucu Hatası", error: (error as Error).message || String(error) });
+    console.error("Login error:", error);
+    res
+      .status(500)
+      .json({
+        message: "Sunucu Hatası",
+        error: (error as Error).message || String(error),
+      });
   }
 };
 
@@ -92,13 +97,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const user: IUser | null = await User.findOne({ email });
     if (!user) {
-      // Even if user is not found, we send a generic success message 
-      // to prevent email enumeration attacks.
-      return res
-        .status(200)
-        .json({
-          message: "Eğer email kayıtlıysa, şifre sıfırlama linki gönderildi.",
-        });
+      return res.status(200).json({
+        message: "Eğer email kayıtlıysa, şifre sıfırlama linki gönderildi.",
+      });
     }
     const resetToken = crypto.randomBytes(20).toString("hex");
     user.passwordResetToken = crypto

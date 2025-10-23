@@ -5,9 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "nodemon -w src -e ts,json --exec \"tsx src/index.ts\"",
-    "build:backend": "tsc -p tsconfig.json",
+    "start": "node backend/dist/index.js",
+    "dev": "nodemon -w backend/src -e ts,json --exec \"tsx backend/src/index.ts\"",
+    "build:backend": "tsc -p backend/tsconfig.json",
     "build:frontend": "npm run build --prefix frontend",
     "build:all": "npm run build:backend && npm run build:frontend",
     "build": "npm run build:backend"

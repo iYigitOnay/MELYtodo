@@ -47,7 +47,6 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// Metodun bir Promise<boolean> döndüreceğini belirtiyoruz
 userSchema.methods.matchPassword = async function (enteredPassword: string): Promise<boolean> {
   return await bcrypt.compare(enteredPassword, this.password);
 };
