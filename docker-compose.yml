@@ -1,48 +1,71 @@
-version: "3.8"
+version: "3.9"
 
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
+  caddy:
+    image: caddy:2
+    container_name: caddy
     ports:
-      - "3000:3000"
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./src:/app/src # Geliştirme sırasında kod değişikliklerini yansıtmak için (isteğe bağlı)
-      - /app/node_modules # node_modules'in host'tan kopyalanmasını engeller
-    environment:
-      MONGO_URI: mongodb+srv://Mely:MelyMY1128@melygrandmomstories.qtbqfbz.mongodb.net/MELYtodo?retryWrites=true&w=majority&appName=MelyGrandmomStories
-      JWT_SECRET: 6a2684171bcd85bcc76e15eb60439c03f327e4a2dedc41a6d4f7b687b3b015c8
-      OPENROUTER_API_KEY: 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
-      PORT: 3000
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     depends_on:
-      - mongo # Backend'in mongo servisine bağımlı olduğunu belirtir
+      - frontend
+      - backend
     networks:
-      - melytodonetwork
+      - appnet
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
+    container_name: melytodo-frontend
+    # Frontend dışa açılmıyor; sadece iç ağda 80 dinler
+    expose:
+      - "80"
+    environment:
+      # Vite/React benzeri istemci için API tabanı (frontend koduna göre adını düzenleyebilirsin)
+      - VITE_API_BASE=https://melygranmomstories.software/api
     networks:
-      - melytodonetwork
+      - appnet
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
+    container_name: melytodo-backend
+    env_file:
+      - ./.env
+    environment:
+      - PORT=3000
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    expose:
+      - "3000"
+    depends_on:
+      - mongo
+    networks:
+      - appnet
 
   mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
+    image: mongo:6
+    container_name: mongo
     volumes:
-      - mongo_data:/data/db # Veritabanı verilerini kalıcı hale getir
+      - mongo_data:/data/db
+    # Dışa açmıyoruz; sadece iç ağda
+    expose:
+      - "27017"
     networks:
-      - melytodonetwork
+      - appnet
 
 volumes:
-  mongo_data: # mongo_data adında bir volume tanımla
+  mongo_data:
+  caddy_data:
+  caddy_config:
 
 networks:
-  melytodonetwork:
+  appnet:
     driver: bridge
